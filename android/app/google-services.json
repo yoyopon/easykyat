@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "430546731091",
+    "firebase_url": "https://ypay-558d0.firebaseio.com",
+    "project_id": "ypay-558d0",
+    "storage_bucket": "ypay-558d0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:430546731091:android:1432ab7757b4cd0738c6a6",
+        "android_client_info": {
+          "package_name": "com.yoyopon.ypay"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "430546731091-3vjgs13u8kcphfvgb1agbmcmovos50dt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.yoyopon.ypay",
+            "certificate_hash": "61dd9b85d01b21f8ef8472870c2c999b47774c74"
+          }
+        },
+        {
+          "client_id": "430546731091-b2pjjh7uji9e76ms9d2dlfbcfoahm92v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKl63MuXMeL-l6cppbICPo8u_YrwiWnLs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "430546731091-b2pjjh7uji9e76ms9d2dlfbcfoahm92v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "430546731091-61l2bh6450nu12m31jc6ihhnei48dksc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.yoyopon.ypay"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
