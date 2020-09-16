@@ -87,7 +87,7 @@ class LoginRepostory{
       return _netUtil.post(this.context,url, headers:myHeaders, body:
       dataStr
       ).then((http.Response response) async {
-        print(response.statusCode);
+        //print(response.statusCode);
         if(response.statusCode==200){
           var obj = json.decode(response.body);//["data"];
           UserInfo info=new UserInfo();

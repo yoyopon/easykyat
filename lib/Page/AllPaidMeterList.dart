@@ -1,48 +1,74 @@
+import 'dart:convert';
+
+import 'package:dash_chat/dash_chat.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:ypay/Providers/AppLocalization.dart';
+import 'package:ypay/dataService/MeterListPresenter.dart';
 import 'package:ypay/dbHelper/DataKeyValue.dart';
 import 'package:ypay/dbHelper/DatabaseHelper.dart';
+import 'package:ypay/designUI/MessageHandel.dart';
 import 'package:ypay/designUI/TextStyle.dart';
+import 'package:ypay/model/AmountStatement.dart';
+import 'package:ypay/model/MeterBind.dart';
+import 'package:ypay/model/PaidBill.dart';
+import 'package:ypay/model/RequestBill.dart';
+import 'package:ypay/model/User.dart';
 
 class AllPaidMeterLists extends StatefulWidget {
   @override
   AllPaidMeterListsState createState() => AllPaidMeterListsState();
 }
 
-class AllPaidMeterListsState extends State<AllPaidMeterLists> {
-
+class AllPaidMeterListsState extends State<AllPaidMeterLists> implements MeterBillListContract{
+  String nullResult="";
   RefreshController _refreshController =RefreshController(initialRefresh: false);
-  List<MeterBillList> topupHistoryList=[];
-  List<MeterBillList> sortByAmountList=[];
+  List<AmountStatement> topupHistoryList=[];
+  List<AmountStatement> sortByAmountList=[];
   List<String> sortType=["Name","Amount","Pay Date"];
   String sortName="Amount";var db=DBHelper();
   bool isShowImage;
+  MeterBillListPresenter presenter;
+  bool topupListLoading=false;
+  bool onlineLoading=false;
 
   @override
   void initState() {
-    getListStyle();
+    presenter=MeterBillListPresenter(this, context);
     getData();
     super.initState();
   }
 
-  getListStyle()async{
-    String isShow=await db.getData(DataKeyValue.hideMeterpic);
-    isShowImage=isShow=="false"?false:true;
-    setState(() {
-      
-    });
+  getData(){
+    getCacheData();
+    presenter.getTopupList(userId:User.users.id.toString(),recordType: 2);
   }
 
-  getData(){
-    //topupHistoryList=MeterBillList.paidBillList;
-    for (var i = 0; i < MeterBillList.paidBillList.length; i++) {
-      if(MeterBillList.paidBillList[i].ispaid==true){
-        topupHistoryList.add(MeterBillList.paidBillList[i]);
+  getCacheData()async{
+    setState(() {
+      topupListLoading=true;
+      onlineLoading=true;
+    });
+    String res=await db.getData(DataKeyValue.paidList);
+    if(res==null||res=="")
+    {
+      topupHistoryList=[];
+    }else{
+      List<dynamic> obj=json.decode(json.decode(res));
+      List<AmountStatement> amtList=new List<AmountStatement>();
+      if(obj!=null||obj.length>0){
+        for (var i = 0; i < obj.length; i++) {
+          amtList.add(AmountStatement.fromJson(obj[i]));
+          int unixTime=int.parse(amtList[i].addTime.substring(6,19));
+          amtList[i].addTime=DateFormat('dd/MM/yyyy').add_jm().format(DateTime.fromMillisecondsSinceEpoch(unixTime)).toString();
+        }
       }
+      topupHistoryList=amtList;
+      getSortTypeName();
     }
-    getSortTypeName();
+    
   }
 
   getSortTypeName()async{
@@ -57,26 +83,29 @@ class AllPaidMeterListsState extends State<AllPaidMeterLists> {
   sortItems(String sname){
     switch (sname) {
       case "Name":
-        topupHistoryList.sort((a, b) => a.address.compareTo(b.address));
+        topupHistoryList.sort((a, b) => a.userName.compareTo(b.userName));
         sortByAmountList=topupHistoryList.toList();
         setState(() {
           
         });break;
 
       case "Pay Date":
-        topupHistoryList.sort((a, b) => a.payDate.compareTo(b.payDate));
+        topupHistoryList.sort((a, b) => a.addTime.compareTo(b.addTime));
         sortByAmountList=topupHistoryList.reversed.toList();
         setState(() {
           
         });break;
       
       default:
-      topupHistoryList.sort((a, b) => a.amountToPay.compareTo(b.amountToPay));
+      topupHistoryList.sort((a, b) => a.value.compareTo(b.value));
       sortByAmountList=topupHistoryList.reversed.toList();
       setState(() {
         
       });
     }
+    setState(() {
+        topupListLoading=false;
+    });
   }
 
   sortRadioDialog(){
@@ -200,7 +229,9 @@ class AllPaidMeterListsState extends State<AllPaidMeterLists> {
               },)
             ],
           ),
-          body: //Center(child: Text("All Topup History"),),
+          body: 
+            topupListLoading==true?
+              Center(child: SpinKitChasingDots(color: Colors.orange[500],),):
             Container(child: Column(children: <Widget>[
               Row(children: <Widget>[
                 Container(
@@ -210,22 +241,11 @@ class AllPaidMeterListsState extends State<AllPaidMeterLists> {
                 ),
                 Expanded(flex: 2,child: Container(),),
                 Container(
-                  padding: EdgeInsets.only(top:10,bottom: 10,right: 3),
-                  child: IconButton(
-                    icon: isShowImage==true?Icon(Icons.apps,color: Colors.grey,):Icon(Icons.list,color: Colors.grey,),
-                    onPressed: ()async{
-                      await db.setData(isShowImage==true?"false":"true",DataKeyValue.hideMeterpic);
-                      isShowImage=isShowImage==true?false:true;
-                      setState(() {
-                        
-                      });
-                    },
-                  ),
-                ),
-                Container(
                   padding: EdgeInsets.all(10),
                   child: Text("${topupHistoryList.length} records"))
               ],),
+              onlineLoading==true?
+              Center(child: SpinKitCircle(color: Colors.grey,size: 15,),):Container(),
               Expanded(
                 child: Container(
                   padding: EdgeInsets.all(5),
@@ -271,22 +291,40 @@ class AllPaidMeterListsState extends State<AllPaidMeterLists> {
                           child: Row(children: <Widget>[
                             IconButton(
                               icon: 
-                              isShowImage==false?
-                              CircleAvatar(child: Icon(Icons.attach_money,color: Colors.white,),radius: 25,backgroundColor: Colors.orange[500],):
-                              CircleAvatar(radius: 25,backgroundColor: Colors.transparent,backgroundImage: sortByAmountList[i].meterImage==""||sortByAmountList[i].meterImage==null?AssetImage("images/nophoto.png"):NetworkImage(sortByAmountList[i].meterImage)),
+                              CircleAvatar(child: Icon(Icons.attach_money,color: Colors.orange[500],),radius: 25,backgroundColor: Colors.transparent,),
                               onPressed: (){},),
                             Container(
                               margin: EdgeInsets.only(left:5),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
-                                Text(sortByAmountList[i].meterNo+" ("+sortByAmountList[i].address+")"),
-                                Text(sortByAmountList[i].lastMonthUnit+" - "+sortByAmountList[i].readUnit+" = "+sortByAmountList[i].unitsToPay),
-                                Text(sortByAmountList[i].payDate.toString(),style: TextStyle(fontSize: 13),)
+                                RichText(
+                                    text: TextSpan(
+                                      children: <TextSpan>[
+                                        TextSpan(text: "Meter: ",style: TextStyle(color: Colors.black,fontFamily: "pyidaungsu")),
+                                        TextSpan(text: sortByAmountList[i].userName,style: TextStyle(color: Colors.blue,fontFamily: "pyidaungsu",fontWeight: FontWeight.bold)),
+                                      ],
+                                    ),
+                                  ),
+                                Container(
+                                  margin: EdgeInsets.only(top:5),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Text("Pay Time",style: TextStyle(fontSize: 10,color: Colors.grey),),
+                                      Text(sortByAmountList[i].addTime.toString(),style: TextStyle(fontSize: 13),)
+                                    ],
+                                )),
                               ],),
                             ),
                             Expanded(flex: 2,child: Container(),),
-                            Text(sortByAmountList[i].amountToPay.toString()+" Ks",style: TextStyle(color: Colors.red),)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text("Pay Amount",style: TextStyle(fontSize: 10,color: Colors.grey),),
+                                Text(sortByAmountList[i].value.toString()+" Ks",style: TextStyle(color: Colors.red,)),
+                              ],
+                            ),
                           ],),
                         );
                       },
@@ -301,26 +339,63 @@ class AllPaidMeterListsState extends State<AllPaidMeterLists> {
       ),
     );
   }
-}
 
-class MeterBillList{
-  String meterNo;
-  double amountToPay;
-  String lastMonthUnit;
-  String readUnit;
-  String unitsToPay;
-  String payDate;
-  String consumerName;
-  bool ispaid;
-  String address;
-  String meterImage;
+  @override
+  void getAmountStatementSuccess(result) {
+    if(result!=null){
+      topupHistoryList=result;
+      for (var i = 0; i < topupHistoryList.length; i++) {
+        int unixTime=int.parse(topupHistoryList[i].addTime.substring(6,19));
+        topupHistoryList[i].addTime=DateFormat('dd/MM/yyyy').add_jm().format(DateTime.fromMillisecondsSinceEpoch(unixTime)).toString();
+      }
+      getSortTypeName();
+    }
+    else{
+      topupHistoryList=[];
+      nullResult="There is no paid meter in your account";
+    }
+    setState(() {
+      onlineLoading=false;
+      topupListLoading=false;
+    });
+  }
 
-  MeterBillList({this.meterNo,this.amountToPay,this.lastMonthUnit,this.readUnit,this.unitsToPay,this.payDate,this.consumerName,this.ispaid,this.address,this.meterImage});
+  @override
+  void getBoundedListSuccess(List<MeterBind> boundedList) {
+    
+  }
 
-  static List<MeterBillList> paidBillList=[
-    new MeterBillList(meterNo:"Meter No1",amountToPay:1800,lastMonthUnit:"1300",readUnit:"1500",unitsToPay:"200",payDate: "2020-09-01",consumerName: "Cole",ispaid: true,address: "18th street cafe",meterImage: ""),
-    new MeterBillList(meterNo:"Meter No2",amountToPay:2000,lastMonthUnit:"2000",readUnit:"2500",unitsToPay:"300",payDate: "",consumerName: "Cole",ispaid: false,address: "22th street house",meterImage: ""),
-    new MeterBillList(meterNo:"Meter No3",amountToPay:2150,lastMonthUnit:"2000",readUnit:"2600",unitsToPay:"400",payDate: "",consumerName: "Cole",ispaid: false,address: "19th street office",meterImage: ""),
-    new MeterBillList(meterNo:"Meter No2",amountToPay:2300,lastMonthUnit:"3200",readUnit:"3400",unitsToPay:"150",payDate: "2020-09-02",consumerName: "Cole",ispaid: true,address: "22th street house",meterImage: ""),
-  ];
+  @override
+  void payMeterSuccess(PaidBillRecord result) {
+    
+  }
+
+  @override
+  void requestMeterSuccess(RequestBill bill) {
+    
+  }
+
+  @override
+  void saveBindSuccess(MeterBind saveBind) {
+    
+  }
+
+  @override
+  void searchBoundListSuccess(MeterBind searchBound) {
+    
+  }
+
+  @override
+  void showError(String msg) {
+    MessageHandel.showError(context,"", msg);
+    setState(() {
+      topupListLoading=false;
+      onlineLoading=false;
+    });
+  }
+
+  @override
+  void showMessage(String msg) {
+    MessageHandel.showMessage(context,"", msg);
+  }
 }

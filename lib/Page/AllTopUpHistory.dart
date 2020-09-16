@@ -42,7 +42,7 @@ class _AllTopUpHistoryState extends State<AllTopUpHistory> implements MeterBillL
 
   getData(){
     getCacheData();
-    presenter.getTopupList(userId:User.users.id.toString());
+    presenter.getTopupList(userId:User.users.id.toString(),recordType: 1);
   }
 
   getCacheData()async{
@@ -276,12 +276,25 @@ class _AllTopUpHistoryState extends State<AllTopUpHistory> implements MeterBillL
                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
                                 Text(title),
-                                Text(sortByAmountList[i].paymentName.toString(),style: TextStyle(fontWeight: FontWeight.w300,)),
-                                Text(sortByAmountList[i].addTime.toString(),style: TextStyle(fontSize: 13),)
+                                Container(
+                                  margin: EdgeInsets.only(top:5),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Text("Topup Time",style: TextStyle(fontSize: 10,color: Colors.grey),),
+                                      Text(sortByAmountList[i].addTime.toString(),style: TextStyle(fontSize: 13),)
+                                    ],
+                                )),
                               ],),
                             ),
                             Expanded(flex: 2,child: Container(),),
-                            Text(sortByAmountList[i].value.toString()+" Ks",style: TextStyle(color: Colors.red,)),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text("Amount",style: TextStyle(fontSize: 10,color: Colors.grey),),
+                                Text(sortByAmountList[i].value.toString()+" Ks",style: TextStyle(color: Colors.red,)),
+                              ],
+                            ),
                           ],),
                         );
                       },

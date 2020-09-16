@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ypay/dbHelper/DatabaseHelper.dart';
 import 'package:ypay/model/MeterBind.dart';
+import 'package:ypay/model/PaidBill.dart';
 import 'package:ypay/model/RequestBill.dart';
 import 'MeterListRepository.dart';
 
@@ -12,7 +13,7 @@ abstract class MeterBillListContract{
   void saveBindSuccess(MeterBind saveBind);
   void getAmountStatementSuccess(dynamic result);
   void requestMeterSuccess(RequestBill bill);
-  void payMeterSuccess(dynamic result);
+  void payMeterSuccess(PaidBillRecord result);
 }
 
 class MeterBillListPresenter{
@@ -49,8 +50,8 @@ class MeterBillListPresenter{
     });
   }
 
-  void getTopupList({String userId}){
-     _repostory.getAmountStatement(userId:userId).then((res){
+  void getTopupList({String userId,int recordType}){
+     _repostory.getAmountStatement(userId:userId,recordType:recordType).then((res){
       _contract.getAmountStatementSuccess(res);
     }).catchError((e){
       _contract.showError(e.toString());

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:ypay/Login/SocialLoginUserInfo.dart';
 import 'package:ypay/Page/BottomTabBar.dart';
 import 'package:ypay/Providers/AppLocalization.dart';
 import 'package:ypay/dataService/MeterListPresenter.dart';
@@ -10,6 +11,7 @@ import 'package:ypay/designUI/TextStyle.dart';
 import 'package:ypay/model/MeterBind.dart';
 import 'package:ypay/model/RequestBill.dart';
 import 'package:ypay/model/User.dart';
+import 'package:ypay/model/userInfo.dart';
 
 class PayMeterBill extends StatefulWidget {
   PayMeterBill({this.invoiceNo,this.customerId}):super();
@@ -48,7 +50,22 @@ class _PayMeterBillState extends State<PayMeterBill> implements MeterBillListCon
             child: Column(children: <Widget>[
               Row(
                 children: <Widget>[
+                  Expanded(flex: 2,child: Container(),),
                   Container(
+                    padding: EdgeInsets.all(10.0),
+                    margin: EdgeInsets.only(right:20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        Text(AppLocalizations.of(context).translate("youremain"),style: TextStyle(fontSize: 13,color: Colors.grey),),
+                        Text(User.users.amount.toString()+" "+requestBill.currency,style: TextStyle(fontSize: 17),)
+                      ],
+                    )
+                  ),
+                ],
+              ),
+              Row(children: <Widget>[
+                Container(
                     margin: EdgeInsets.only(left:10,top:10),
                     child: CircleAvatar(child: Icon(Icons.attach_money,color: Colors.white,),radius: 30,backgroundColor: Colors.orange[500],)),
                   Container(
@@ -62,13 +79,9 @@ class _PayMeterBillState extends State<PayMeterBill> implements MeterBillListCon
                       ],
                     )
                   ),
-                  Expanded(flex: 2,child: Container(),),
-                ],
-              ),
-              Row(children: <Widget>[
                 Expanded(flex: 2,child: Container(),),
                 Container(
-                  margin: EdgeInsets.only(right:15),
+                  margin: EdgeInsets.only(right:20,top:10),
                   child: Text("${billinfoList.length.toString()} bills",style: TextStyle(fontSize: 13,color: Colors.grey),),)
               ],),
               Expanded(
@@ -187,12 +200,67 @@ class _PayMeterBillState extends State<PayMeterBill> implements MeterBillListCon
     );
   }
 
+  paycheck(){
+    showGeneralDialog(
+    barrierColor: Colors.black.withOpacity(0.7),
+    transitionBuilder: (context, a1, a2, widget) {
+      final curvedValue = Curves.easeInOutBack.transform(a1.value) -   1.0;
+      return WillPopScope(
+        onWillPop: () async=>false,
+        child: Transform(
+          transform: Matrix4.translationValues(0.0, curvedValue * 200, 0.0),
+          child: Opacity(
+            opacity: a1.value,
+            child: AlertDialog(
+              content: Container(
+                height: MediaQuery.of(context).size.height*0.8/2,
+                child: Column(children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: CircleAvatar(backgroundColor: Colors.orange[500],child: Icon(Icons.info_outline,size: 30,color: Colors.white,),radius: 40,),
+                  ),
+                  Text("Error!!!",style: TextStyle(fontSize: 20,fontFamily: "pyidaungsu"),),
+                  SizedBox(height: MediaQuery.of(context).size.height*1/20,),
+                  Text(AppLocalizations.of(context).translate("yourbal"),style: TextStyle(fontSize: 15,fontFamily: "pyidaungsu"),),
+                ],),
+              ),
+              actions: <Widget>[
+                Container(
+                  margin: EdgeInsets.only(right:5),
+                  child: FlatButton(
+                    color: Colors.orange[500],
+                    child: Container(
+                      width: MediaQuery.of(context).size.width*1/4,
+                      padding: EdgeInsets.all(5),
+                      child: Text("OK",textAlign: TextAlign.center,style: TextStyle(fontFamily: "pyidaungsu",fontSize: 15,color: Colors.white),)),
+                    onPressed: (){
+                      Navigator.pop(context);
+                    },
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+    transitionDuration: Duration(milliseconds: 500),
+    barrierDismissible: false,
+    barrierLabel: '',
+    context: context,
+    pageBuilder: (context, animation1, animation2) {});
+  }
+
   payBill(){
-    // presenter.payMeter(payamount:requestBill.totalAmount,customerId:widget.customerId,invoiceId:widget.invoiceNo,userId:User.users.id.toString());
-    // setState(() {
-    //   payLoaing=true;
-    // });
-    payBillSuccess();
+    if(User.users.amount<double.parse(requestBill.totalAmount)){
+      paycheck();
+    }
+    else{
+      presenter.payMeter(payamount:requestBill.totalAmount,customerId:widget.customerId,invoiceId:widget.invoiceNo,userId:User.users.id.toString());
+      setState(() {
+        payLoaing=true;
+      });
+    }
   }
 
   payBillSuccess(){
@@ -224,15 +292,6 @@ class _PayMeterBillState extends State<PayMeterBill> implements MeterBillListCon
                 ],),
               ),
               actions: <Widget>[
-                FlatButton(
-                  color: Colors.grey,
-                  child: Container(
-                    width: MediaQuery.of(context).size.width*1/4,
-                    padding: EdgeInsets.all(5),
-                    child: Text("Cancel",textAlign: TextAlign.center,style: TextStyle(fontFamily: "pyidaungsu",fontSize: 15,color: Colors.white),)),
-                  onPressed: (){Navigator.pop(context);},
-                ),
-                //SizedBox(width: MediaQuery.of(context).size.width*1/4,),
                 Container(
                   margin: EdgeInsets.only(right:5),
                   child: FlatButton(
@@ -242,7 +301,7 @@ class _PayMeterBillState extends State<PayMeterBill> implements MeterBillListCon
                       padding: EdgeInsets.all(5),
                       child: Text("Done",textAlign: TextAlign.center,style: TextStyle(fontFamily: "pyidaungsu",fontSize: 15,color: Colors.white),)),
                     onPressed: (){
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>BottomTabBar()));
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>SocialLoginUserInfo(userId: User.users.id.toString(),)));
                     },
                   ),
                 )

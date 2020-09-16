@@ -644,11 +644,10 @@ class _UserProfileState extends State<UserProfile> with UserProfileContract{
     await db.setData("",DataKeyValue.fullname);
     await db.setData("",DataKeyValue.sortTypeName);
     await db.setData("",DataKeyValue.sortTypeName1);
-    await db.setData("",DataKeyValue.hideMeterpic);
-    await db.setData("",DataKeyValue.hideMeterpic1);
     await db.setData("",DataKeyValue.allmsgCount);
     await db.setData("",DataKeyValue.topupList);
     await db.setData("",DataKeyValue.bindList);
+    await db.setData("",DataKeyValue.paidList);
   }
 
   @override

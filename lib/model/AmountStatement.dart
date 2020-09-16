@@ -3,7 +3,7 @@ class AmountStatement {
   int userId;
   String userName;
   int paymentId;
-  String paymentName;
+  int paymentName;
   double value;
   String remark;
   String addTime;

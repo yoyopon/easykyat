@@ -104,7 +104,7 @@ class _SplashscreenState extends State<Splashscreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-            Text("YPAY",style: TextStyle(fontSize: 30,fontFamily: "Roboto Slab Regular",color: Colors.orange[500])),
+            Text("YPAY",style: TextStyle(fontSize: 30,color: Colors.orange[500])),
             SpinKitFadingFour(color: Colors.orange[400],size: 30.0,),
           ],)
         ),

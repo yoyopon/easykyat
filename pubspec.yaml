@@ -87,7 +87,6 @@ flutter:
    - images/mmRound.png
    - images/usaRound.png
    - images/default-avatar.jpg
-   - images/nophoto.png
 
    - i18n/en.json
    - i18n/mm.json
@@ -113,9 +112,6 @@ flutter:
     - family: MyFlutterApp
       fonts:
         - asset: fonts/MyFlutterApp.ttf
-    - family: Roboto Slab Regular
-      fonts:
-        - asset: fonts/RobotoSlab.ttf
     - family: myanmar3
       fonts:
         - asset: fonts/Myanmar3_MultiOS.ttf

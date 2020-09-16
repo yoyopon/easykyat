@@ -68,6 +68,7 @@ class UserProfilePresenter{
       }
       else{
         _contract.showError("Error Occurred");
+        _contract.notideleteSuccess();
       }
     }).catchError((e){
       _contract.showError(e.toString());

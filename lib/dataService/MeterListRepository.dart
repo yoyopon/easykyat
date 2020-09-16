@@ -7,6 +7,7 @@ import 'package:ypay/dbHelper/DatabaseHelper.dart';
 import 'package:ypay/designUI/MessageHandel.dart';
 import 'package:ypay/model/AmountStatement.dart';
 import 'package:ypay/model/MeterBind.dart';
+import 'package:ypay/model/PaidBill.dart';
 import 'package:ypay/model/RequestBill.dart';
 
 class MeterBillListRepository{
@@ -111,22 +112,27 @@ class MeterBillListRepository{
       }
   }
 
-  Future<dynamic> getAmountStatement({String userId}){
-    var url="$backendUrl/api/payment/amount_statement?user_id=$userId";
+  Future<dynamic> getAmountStatement({String userId,int recordType}){
+    var url="$backendUrl/api/payment/amount_statement?user_id=$userId&record_type=$recordType";
     return getToken().then((tt){
-      return amountStateMentPost(url, tt).then((res){
+      return amountStateMentPost(url, tt,recordType).then((res){
         return res;
       });
     });
   }
-  Future<List<AmountStatement>> amountStateMentPost(String url,String token,{dynamic encoding})async{
+  Future<List<AmountStatement>> amountStateMentPost(String url,String token,int recordType,{dynamic encoding})async{
     var request=await http.post(
       url,
       headers: {"Authorization": token},
       encoding: encoding
       );
       if(request.statusCode==200){
-        setTempValue(request.body);
+        if(recordType==1){
+          await db.setData(request.body, DataKeyValue.topupList);
+        }
+        if(recordType==2){
+          await db.setData(request.body, DataKeyValue.paidList);
+        }
         var obj=json.decode(request.body);
         List<dynamic> obj1=json.decode(obj);
         List<AmountStatement> amountStatement=new List<AmountStatement>();
@@ -138,9 +144,6 @@ class MeterBillListRepository{
       else{
         return null;
       }
-  }
-  setTempValue(String responseString)async{
-    await db.setData(responseString, DataKeyValue.topupList);
   }
 
   Future<dynamic> requestBillPay({String customerNo,String invoiceNo,String userId}){
@@ -162,20 +165,27 @@ class MeterBillListRepository{
         dynamic obj1=json.decode(obj);
         RequestBill requestBill=new RequestBill();
         requestBill=RequestBill.fromJson(obj1);
-        if(requestBill.subscriberStatus=="valid"){
-          return requestBill;
+        // if(requestBill.subscriberStatus=="valid"){
+        //   return requestBill;
+        // }
+        // else{
+        //   await db.setData("Invalid Invoice No", DataKeyValue.requestErrorMsg);
+        //   return null;
+        // }
+        if(requestBill.totalAmount=="0"){
+          await db.setData("This bill is already paid!!!", DataKeyValue.requestErrorMsg);
+          return null;
         }
         else{
-          setResponseMessage("Invalid Invoice No");
-          Future.delayed(Duration(milliseconds: 200));
-          return null;
+          return requestBill;
         }
       }
       else{
         if(request.body!=null){
           var obj=json.decode(request.body);
-          setResponseMessage(obj["response_desc"]);
-          Future.delayed(Duration(milliseconds: 200));
+          await db.setData(obj["response_desc"], DataKeyValue.requestErrorMsg);
+          //setResponseMessage(obj["response_desc"]);
+          //Future.delayed(Duration(milliseconds: 200));
         }
         return null;
       }
@@ -192,21 +202,14 @@ class MeterBillListRepository{
       });
     });
   }
-  Future<RequestBill> payPost(String url,String token,{dynamic encoding})async{
+  Future<PaidBillRecord> payPost(String url,String token,{dynamic encoding})async{
     var request=await http.post(url,headers: {"Authorization": token},encoding: encoding);
       if(request.statusCode==200){
         var obj=json.decode(request.body);
         dynamic obj1=json.decode(obj);
-        RequestBill requestBill=new RequestBill();
-        requestBill=RequestBill.fromJson(obj1);
-        if(requestBill.subscriberStatus=="valid"){
-          return requestBill;
-        }
-        else{
-          setResponseMessage("Invalid Invoice No");
-          Future.delayed(Duration(milliseconds: 200));
-          return null;
-        }
+        PaidBillRecord paidBillRecord=new PaidBillRecord();
+        paidBillRecord=PaidBillRecord.fromJson(obj1);
+        return paidBillRecord;
       }
       else{
         if(request.body!=null){

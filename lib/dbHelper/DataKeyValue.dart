@@ -8,11 +8,10 @@ class DataKeyValue{
   static String get fullname => "fullname";
   static String get sortTypeName => "sortTypeName";
   static String get sortTypeName1 => "sortTypeName1";
-  static String get hideMeterpic => "true";
-  static String get hideMeterpic1 => "true";
   static String get allmsgCount => "msgCount";
   static String get unreadCount => "readCount";
   static String get topupList => "topupList";
   static String get bindList => "bindList";
+  static String get paidList => "bindList";
   static String get requestErrorMsg => "requestErrorMsg";
 }
