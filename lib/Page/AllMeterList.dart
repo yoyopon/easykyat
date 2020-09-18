@@ -192,7 +192,7 @@ class _AllMeterListState extends State<AllMeterList> implements MeterBillListCon
                 Container(
                   margin: EdgeInsets.symmetric(vertical:8),
                   padding: EdgeInsets.all(10),
-                  child: Text("Meter : "+text,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.grey)),
+                  child: Text("Meter : "+(allMetersList.length==0?"":text),style: TextStyle(fontWeight: FontWeight.bold,color: Colors.grey)),
                 ),
                 Expanded(flex: 2,child: Container(),),
                 Container(

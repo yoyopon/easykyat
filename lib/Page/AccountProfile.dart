@@ -141,7 +141,7 @@ class _UserProfileState extends State<UserProfile> with UserProfileContract{
                                     child: Image.file(UserInfo.fileImage,)):
                                   (UserInfo.userInfo.imageUrl=="imageURl"||UserInfo.userInfo.imageUrl==""||UserInfo.userInfo.imageUrl==null?
                                   Image.asset('images/default-avatar.jpg',)
-                                  :NetworkImage(UserInfo.userInfo.imageUrl))):
+                                  :Image.network(UserInfo.userInfo.imageUrl))):
                                 CachedNetworkImage(imageUrl: backendUrl+User.users.avatar,)
                               ),
                             ),

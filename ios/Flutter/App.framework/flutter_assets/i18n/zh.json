@@ -108,5 +108,7 @@
     "billamount":"账单金额",
     "payall":"请全部付清",
     "paysuccess":"您已成功支付所有账单",
-    "paidamount":"已付金额"
+    "paidamount":"已付金额",
+    "youremain":"您的余额",
+    "yourbal":"您的余额不足以支付!!!请先充值"
 }

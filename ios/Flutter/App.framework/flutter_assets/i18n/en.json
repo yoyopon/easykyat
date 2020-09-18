@@ -108,5 +108,7 @@
     "billamount":"Bill Amount",
     "payall":"Pay All Bills",
     "paysuccess":"You have successfully paid all bills",
-    "paidamount":"Paid Amount"
+    "paidamount":"Paid Amount",
+    "youremain":"Remaining balance",
+    "yourbal":"Your balance is insufficient to pay!!!Please topup first"
 }

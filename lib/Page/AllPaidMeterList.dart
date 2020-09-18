@@ -246,6 +246,10 @@ class AllPaidMeterListsState extends State<AllPaidMeterLists> implements MeterBi
               ],),
               onlineLoading==true?
               Center(child: SpinKitCircle(color: Colors.grey,size: 15,),):Container(),
+              topupHistoryList.length==0?
+              Center(child: Container(
+                margin: EdgeInsets.only(top:40),
+                child: Text(nullResult)),):
               Expanded(
                 child: Container(
                   padding: EdgeInsets.all(5),

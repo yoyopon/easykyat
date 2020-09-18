@@ -285,6 +285,7 @@ class DBHelper {
       print("delete success");
       return true;
     }catch(ex){
+      //print(ex.toString());
       return false;
     }
   }
